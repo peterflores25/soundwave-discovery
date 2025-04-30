@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
@@ -7,6 +6,7 @@ import MusicPlayer from '@/components/MusicPlayer';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { getTopTracks, getCountryChart, getMockTracks } from '@/services/spotifyService';
 import { toast } from '@/hooks/use-toast';
+import { PlaylistData } from '@/components/Playlist';
 
 const Charts = () => {
   const [globalCharts, setGlobalCharts] = useState<any[]>([]);
@@ -15,7 +15,8 @@ const Charts = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playerMinimized, setPlayerMinimized] = useState(true);
   const [loading, setLoading] = useState(true);
-  
+  const [playlists, setPlaylists] = useState<PlaylistData[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,6 +47,30 @@ const Charts = () => {
     fetchData();
   }, []);
   
+  useEffect(() => {
+    // Load playlists from localStorage
+    const savedPlaylists = localStorage.getItem('playlists');
+    if (savedPlaylists) {
+      try {
+        const parsedPlaylists = JSON.parse(savedPlaylists);
+        // Convert string dates back to Date objects
+        parsedPlaylists.forEach((playlist: any) => {
+          playlist.createdAt = new Date(playlist.createdAt);
+        });
+        setPlaylists(parsedPlaylists);
+      } catch (e) {
+        console.error('Error parsing playlists:', e);
+      }
+    }
+  }, []);
+  
+  // Save playlists to localStorage when they change
+  useEffect(() => {
+    if (playlists.length > 0) {
+      localStorage.setItem('playlists', JSON.stringify(playlists));
+    }
+  }, [playlists]);
+  
   const handlePlay = (id: string) => {
     const song = [...globalCharts, ...usCharts].find(song => song.id === id);
     
@@ -68,44 +93,49 @@ const Charts = () => {
     }
   };
   
-  const handleAddToPlaylist = (song: any) => {
-    // Get existing saved songs from localStorage
-    const savedPlaylistsStr = localStorage.getItem('userPlaylists');
-    let savedPlaylists = savedPlaylistsStr ? JSON.parse(savedPlaylistsStr) : [];
+  const handleSelectPlaylist = (playlistId: string, song: any) => {
+    // Find the playlist by ID
+    const targetPlaylistIndex = playlists.findIndex(p => p.id === playlistId);
     
-    // If no playlists exist, create a default one
-    if (savedPlaylists.length === 0) {
-      savedPlaylists = [{
-        id: '1',
-        name: 'My Favorite Tracks',
-        description: 'A collection of my favorite songs',
-        coverImage: song.albumArt,
-        tracks: [song],
-        createdAt: new Date().toISOString()
-      }];
+    if (targetPlaylistIndex === -1) return;
+    
+    // Check if song already exists in the playlist
+    if (playlists[targetPlaylistIndex].tracks.some(t => t.id === song.id)) {
       toast({
-        description: `Created "My Favorite Tracks" playlist with "${song.title}"`
+        description: `"${song.title}" est déjà dans cette playlist`
       });
-    } else {
-      // Add to the first playlist for simplicity
-      const firstPlaylist = savedPlaylists[0];
-      
-      // Check if song already exists in the playlist
-      if (!firstPlaylist.tracks.some((track: any) => track.id === song.id)) {
-        firstPlaylist.tracks.push(song);
-        toast({
-          description: `Added "${song.title}" to "${firstPlaylist.name}"`
-        });
-      } else {
-        toast({
-          description: `"${song.title}" is already in "${firstPlaylist.name}"`
-        });
-        return;
-      }
+      return;
     }
     
-    // Save back to localStorage
-    localStorage.setItem('userPlaylists', JSON.stringify(savedPlaylists));
+    // Add song to the selected playlist
+    const updatedPlaylists = [...playlists];
+    updatedPlaylists[targetPlaylistIndex].tracks.push(song);
+    setPlaylists(updatedPlaylists);
+  };
+  
+  const handleAddToPlaylist = (song: any) => {
+    if (playlists.length === 0) {
+      // If no playlists exist, create a default one
+      const newPlaylist: PlaylistData = {
+        id: Date.now().toString(),
+        name: 'Ma Playlist',
+        description: 'Créée à partir des morceaux favoris',
+        coverImage: song.albumArt,
+        tracks: [song],
+        createdAt: new Date()
+      };
+      
+      setPlaylists([newPlaylist]);
+      
+      toast({
+        title: "Nouvelle playlist créée",
+        description: `"${song.title}" ajouté à "Ma Playlist"`
+      });
+    } else {
+      toast({
+        description: "Veuillez sélectionner une playlist existante",
+      });
+    }
   };
   
   const handlePlayPause = () => {
@@ -159,6 +189,8 @@ const Charts = () => {
               currentlyPlaying={isPlaying ? currentSong?.id : undefined}
               type="list"
               onAddToPlaylist={handleAddToPlaylist}
+              playlists={playlists}
+              onSelectPlaylist={handleSelectPlaylist}
             />
             
             <ChartSection 
@@ -170,6 +202,8 @@ const Charts = () => {
               className="mt-12"
               type="list"
               onAddToPlaylist={handleAddToPlaylist}
+              playlists={playlists}
+              onSelectPlaylist={handleSelectPlaylist}
             />
           </>
         )}

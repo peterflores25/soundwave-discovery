@@ -2,6 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import SongCard from './SongCard';
+import { PlaylistData } from './Playlist';
 
 interface Song {
   id: string;
@@ -22,6 +23,8 @@ interface ChartSectionProps {
   description?: string;
   type?: 'grid' | 'list';
   onAddToPlaylist?: (song: Song) => void;
+  playlists?: PlaylistData[];
+  onSelectPlaylist?: (playlistId: string, song: Song) => void;
 }
 
 const ChartSection = ({ 
@@ -32,7 +35,9 @@ const ChartSection = ({
   title,
   description,
   type = 'list',
-  onAddToPlaylist
+  onAddToPlaylist,
+  playlists = [],
+  onSelectPlaylist
 }: ChartSectionProps) => {
   return (
     <div className={cn("py-8", className)}>
@@ -57,7 +62,9 @@ const ChartSection = ({
                 variant="chart"
                 youtubeUrl={song.youtubeUrl}
                 className={index < songs.length - 1 ? "border-b" : ""}
-                onAddToPlaylist={onAddToPlaylist ? () => onAddToPlaylist(song) : undefined}
+                onAddToPlaylist={onAddToPlaylist}
+                playlists={playlists}
+                onSelectPlaylist={onSelectPlaylist}
               />
             ))}
           </div>
@@ -74,7 +81,9 @@ const ChartSection = ({
                 onPlay={onPlay}
                 isPlaying={currentlyPlaying === song.id}
                 youtubeUrl={song.youtubeUrl}
-                onAddToPlaylist={onAddToPlaylist ? () => onAddToPlaylist(song) : undefined}
+                onAddToPlaylist={onAddToPlaylist}
+                playlists={playlists}
+                onSelectPlaylist={onSelectPlaylist}
               />
             ))}
           </div>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import SongCard from './SongCard';
+import { PlaylistData } from './Playlist';
 
 interface Song {
   id: string;
@@ -21,6 +22,8 @@ interface TrendingSongsProps {
   showViewMore?: boolean;
   onViewMore?: () => void;
   onAddToPlaylist?: (song: Song) => void;
+  playlists?: PlaylistData[];
+  onSelectPlaylist?: (playlistId: string, song: Song) => void;
 }
 
 const TrendingSongs = ({ 
@@ -31,7 +34,9 @@ const TrendingSongs = ({
   title = "Trending Now",
   showViewMore = false,
   onViewMore,
-  onAddToPlaylist
+  onAddToPlaylist,
+  playlists = [],
+  onSelectPlaylist
 }: TrendingSongsProps) => {
   return (
     <div className={cn("py-8", className)}>
@@ -61,7 +66,9 @@ const TrendingSongs = ({
               isPlaying={currentlyPlaying === song.id}
               youtubeUrl={song.youtubeUrl}
               className="animate-scale-in"
-              onAddToPlaylist={onAddToPlaylist ? () => onAddToPlaylist(song) : undefined}
+              onAddToPlaylist={onAddToPlaylist}
+              playlists={playlists}
+              onSelectPlaylist={onSelectPlaylist}
             />
           ))}
         </div>

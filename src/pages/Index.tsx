@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
@@ -200,13 +199,33 @@ const Index = () => {
     }
   };
   
+  const handleSelectPlaylist = (playlistId: string, track: any) => {
+    // Find the playlist by ID
+    const targetPlaylistIndex = playlists.findIndex(p => p.id === playlistId);
+    
+    if (targetPlaylistIndex === -1) return;
+    
+    // Check if track already exists in the playlist
+    if (playlists[targetPlaylistIndex].tracks.some(t => t.id === track.id)) {
+      toast({
+        description: `${track.title} est déjà dans cette playlist`
+      });
+      return;
+    }
+    
+    // Add track to the selected playlist
+    const updatedPlaylists = [...playlists];
+    updatedPlaylists[targetPlaylistIndex].tracks.push(track);
+    setPlaylists(updatedPlaylists);
+  };
+  
   const handleAddToPlaylist = (track: any) => {
     if (playlists.length === 0) {
       // If no playlists exist, create a default one
       const newPlaylist: PlaylistData = {
         id: Date.now().toString(),
-        name: 'My Playlist',
-        description: 'Created from favorited tracks',
+        name: 'Ma Playlist',
+        description: 'Créée à partir des morceaux favoris',
         coverImage: track.albumArt,
         tracks: [track],
         createdAt: new Date()
@@ -215,27 +234,12 @@ const Index = () => {
       setPlaylists([newPlaylist]);
       
       toast({
-        title: "New playlist created",
-        description: `${track.title} added to "My Playlist"`
+        title: "Nouvelle playlist créée",
+        description: `${track.title} ajouté à "Ma Playlist"`
       });
     } else {
-      // Add to the first playlist (in a real app, you'd have a playlist selector)
-      const updatedPlaylists = [...playlists];
-      const targetPlaylist = updatedPlaylists[0];
-      
-      // Check if track already exists in the playlist
-      if (targetPlaylist.tracks.some(t => t.id === track.id)) {
-        toast({
-          description: `${track.title} is already in "${targetPlaylist.name}"`
-        });
-        return;
-      }
-      
-      targetPlaylist.tracks.push(track);
-      setPlaylists(updatedPlaylists);
-      
       toast({
-        description: `${track.title} added to "${targetPlaylist.name}"`
+        description: "Veuillez sélectionner une playlist existante",
       });
     }
   };
@@ -268,6 +272,8 @@ const Index = () => {
           onClose={closeSearchResults}
           currentlyPlaying={isPlaying ? currentSong?.id : undefined}
           onAddToPlaylist={handleAddToPlaylist}
+          playlists={playlists}
+          onSelectPlaylist={handleSelectPlaylist}
         />
       )}
       
@@ -307,6 +313,9 @@ const Index = () => {
               currentlyPlaying={isPlaying ? currentSong?.id : undefined}
               showViewMore
               onViewMore={() => console.log('View more trending')}
+              onAddToPlaylist={handleAddToPlaylist}
+              playlists={playlists}
+              onSelectPlaylist={handleSelectPlaylist}
             />
             
             <TrendingSongs 
@@ -317,6 +326,9 @@ const Index = () => {
               className="mt-12"
               showViewMore
               onViewMore={() => console.log('View more releases')}
+              onAddToPlaylist={handleAddToPlaylist}
+              playlists={playlists}
+              onSelectPlaylist={handleSelectPlaylist}
             />
             
             {listeningHistory.length > 0 && (
@@ -328,6 +340,9 @@ const Index = () => {
                 className="mt-12"
                 showViewMore
                 onViewMore={() => window.location.href = '/history'}
+                onAddToPlaylist={handleAddToPlaylist}
+                playlists={playlists}
+                onSelectPlaylist={handleSelectPlaylist}
               />
             )}
           </div>

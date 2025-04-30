@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { PlusCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import PlaylistSelector from './PlaylistSelector';
+import { PlaylistData } from './Playlist';
 
 interface SongCardProps {
   id: string;
@@ -16,6 +18,8 @@ interface SongCardProps {
   variant?: 'default' | 'compact' | 'chart';
   youtubeUrl?: string;
   onAddToPlaylist?: (song: { id: string, title: string, artist: string, albumArt: string, duration: string }) => void;
+  playlists?: PlaylistData[];
+  onSelectPlaylist?: (playlistId: string, song: any) => void;
 }
 
 const SongCard = ({ 
@@ -29,7 +33,9 @@ const SongCard = ({
   className,
   variant = 'default',
   youtubeUrl,
-  onAddToPlaylist
+  onAddToPlaylist,
+  playlists = [],
+  onSelectPlaylist
 }: SongCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -41,11 +47,10 @@ const SongCard = ({
     e.stopPropagation(); // Prevent triggering play
     if (onAddToPlaylist) {
       onAddToPlaylist({ id, title, artist, albumArt, duration });
-      toast({
-        description: `"${title}" by ${artist} has been added to your playlist`,
-      });
     }
   };
+  
+  const song = { id, title, artist, albumArt, duration };
 
   if (variant === 'compact') {
     return (
@@ -160,13 +165,19 @@ const SongCard = ({
         </div>
         
         <div className="flex items-center">
-          {onAddToPlaylist && (
-            <button 
-              onClick={handleAddToPlaylist}
-              className="text-primary hover:text-primary/80 transition-colors mr-3 opacity-0 group-hover:opacity-100"
+          {onAddToPlaylist && onSelectPlaylist && playlists && (
+            <PlaylistSelector
+              song={song}
+              playlists={playlists}
+              onCreateNewPlaylist={onAddToPlaylist}
+              onSelectPlaylist={onSelectPlaylist}
             >
-              <PlusCircle className="h-5 w-5" />
-            </button>
+              <button 
+                className="text-primary hover:text-primary/80 transition-colors mr-3 opacity-0 group-hover:opacity-100"
+              >
+                <PlusCircle className="h-5 w-5" />
+              </button>
+            </PlaylistSelector>
           )}
         
           {youtubeUrl && (
@@ -236,13 +247,19 @@ const SongCard = ({
           </div>
         )}
         
-        {onAddToPlaylist && isHovered && (
-          <button 
-            onClick={handleAddToPlaylist}
-            className="absolute top-3 right-3 rounded-full bg-primary text-primary-foreground w-8 h-8 flex items-center justify-center shadow-lg opacity-90 hover:opacity-100"
+        {onAddToPlaylist && onSelectPlaylist && playlists && isHovered && (
+          <PlaylistSelector
+            song={song}
+            playlists={playlists}
+            onCreateNewPlaylist={onAddToPlaylist}
+            onSelectPlaylist={onSelectPlaylist}
           >
-            <PlusCircle className="h-5 w-5" />
-          </button>
+            <button 
+              className="absolute top-3 right-3 rounded-full bg-primary text-primary-foreground w-8 h-8 flex items-center justify-center shadow-lg opacity-90 hover:opacity-100"
+            >
+              <PlusCircle className="h-5 w-5" />
+            </button>
+          </PlaylistSelector>
         )}
       </div>
       
