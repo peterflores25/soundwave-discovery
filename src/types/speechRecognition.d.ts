@@ -40,3 +40,9 @@ interface SpeechRecognitionConstructor {
 
 declare var SpeechRecognition: SpeechRecognitionConstructor | undefined;
 declare var webkitSpeechRecognition: SpeechRecognitionConstructor | undefined;
+
+// Add this to fix the window undefined error
+interface Window {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+}

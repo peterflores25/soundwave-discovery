@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Play, MoreHorizontal, Trash2, Edit2, ListMusic, PlusCircle, Music } from 'lucide-react';
+import { Play, MoreHorizontal, Trash2, Edit2, ListMusic, PlusCircle, Music, Share2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export interface PlaylistItem {
@@ -64,6 +64,43 @@ const Playlist = ({
     return `${minutes} min`;
   };
 
+  const handleSharePlaylist = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `Playlist: ${playlist.name}`,
+        text: `Check out my playlist "${playlist.name}" with ${playlist.tracks.length} tracks!`,
+        url: window.location.href
+      })
+      .then(() => {
+        toast({
+          description: "Playlist partagée avec succès!",
+        });
+      })
+      .catch((error) => {
+        console.error('Error sharing:', error);
+        // Fallback for desktop
+        fallbackShare();
+      });
+    } else {
+      fallbackShare();
+    }
+    setIsMenuOpen(false);
+  };
+
+  const fallbackShare = () => {
+    // Create a playlist data text for copying
+    const playlistText = `Playlist: ${playlist.name}\n\nDescription: ${playlist.description}\n\nTracks:\n${
+      playlist.tracks.map((track, index) => `${index + 1}. ${track.title} - ${track.artist}`).join('\n')
+    }`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(playlistText).then(() => {
+      toast({
+        description: "Détails de la playlist copiés dans le presse-papiers!",
+      });
+    });
+  };
+
   return (
     <div className={cn("bg-card/30 backdrop-blur-md rounded-lg border border-white/5 overflow-hidden", className)}>
       <div className="p-4">
@@ -107,6 +144,13 @@ const Playlist = ({
                 {isMenuOpen && (
                   <div className="absolute right-0 mt-1 w-48 bg-black/95 backdrop-blur-lg border border-white/10 rounded-md shadow-lg z-10 py-1">
                     <button
+                      onClick={handleSharePlaylist}
+                      className="w-full text-left px-4 py-2 hover:bg-white/5 flex items-center"
+                    >
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Partager la playlist
+                    </button>
+                    <button
                       onClick={() => {
                         onEditPlaylist(playlist);
                         setIsMenuOpen(false);
@@ -143,6 +187,14 @@ const Playlist = ({
               >
                 <Play className="h-5 w-5 mr-2" />
                 Play
+              </button>
+              
+              <button
+                onClick={handleSharePlaylist}
+                className="border border-white/20 bg-white/5 hover:bg-white/10 rounded-full px-6 py-2 flex items-center transition-colors"
+              >
+                <Share2 className="h-5 w-5 mr-2" />
+                Partager
               </button>
             </div>
           </div>
