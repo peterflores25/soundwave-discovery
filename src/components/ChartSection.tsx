@@ -21,6 +21,7 @@ interface ChartSectionProps {
   title: string;
   description?: string;
   type?: 'grid' | 'list';
+  onAddToPlaylist?: (song: Song) => void;
 }
 
 const ChartSection = ({ 
@@ -30,7 +31,8 @@ const ChartSection = ({
   className,
   title,
   description,
-  type = 'list'
+  type = 'list',
+  onAddToPlaylist
 }: ChartSectionProps) => {
   return (
     <div className={cn("py-8", className)}>
@@ -55,6 +57,7 @@ const ChartSection = ({
                 variant="chart"
                 youtubeUrl={song.youtubeUrl}
                 className={index < songs.length - 1 ? "border-b" : ""}
+                onAddToPlaylist={onAddToPlaylist ? () => onAddToPlaylist(song) : undefined}
               />
             ))}
           </div>
@@ -71,6 +74,7 @@ const ChartSection = ({
                 onPlay={onPlay}
                 isPlaying={currentlyPlaying === song.id}
                 youtubeUrl={song.youtubeUrl}
+                onAddToPlaylist={onAddToPlaylist ? () => onAddToPlaylist(song) : undefined}
               />
             ))}
           </div>

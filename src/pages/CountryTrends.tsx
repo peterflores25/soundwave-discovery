@@ -90,6 +90,46 @@ const CountryTrends = () => {
     }
   };
   
+  const handleAddToPlaylist = (song: any) => {
+    // Get existing saved songs from localStorage
+    const savedPlaylistsStr = localStorage.getItem('userPlaylists');
+    let savedPlaylists = savedPlaylistsStr ? JSON.parse(savedPlaylistsStr) : [];
+    
+    // If no playlists exist, create a default one
+    if (savedPlaylists.length === 0) {
+      savedPlaylists = [{
+        id: '1',
+        name: 'My Favorite Tracks',
+        description: 'A collection of my favorite songs',
+        coverImage: song.albumArt,
+        tracks: [song],
+        createdAt: new Date().toISOString()
+      }];
+      toast({
+        description: `Created "My Favorite Tracks" playlist with "${song.title}"`
+      });
+    } else {
+      // Add to the first playlist for simplicity
+      const firstPlaylist = savedPlaylists[0];
+      
+      // Check if song already exists in the playlist
+      if (!firstPlaylist.tracks.some((track: any) => track.id === song.id)) {
+        firstPlaylist.tracks.push(song);
+        toast({
+          description: `Added "${song.title}" to "${firstPlaylist.name}"`
+        });
+      } else {
+        toast({
+          description: `"${song.title}" is already in "${firstPlaylist.name}"`
+        });
+        return;
+      }
+    }
+    
+    // Save back to localStorage
+    localStorage.setItem('userPlaylists', JSON.stringify(savedPlaylists));
+  };
+  
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
   };
@@ -163,6 +203,7 @@ const CountryTrends = () => {
             onPlay={handlePlay} 
             currentlyPlaying={isPlaying ? currentSong?.id : undefined}
             type="list"
+            onAddToPlaylist={handleAddToPlaylist}
           />
         )}
       </div>

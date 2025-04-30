@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { PlusCircle } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface SongCardProps {
   id: string;
@@ -13,6 +15,7 @@ interface SongCardProps {
   className?: string;
   variant?: 'default' | 'compact' | 'chart';
   youtubeUrl?: string;
+  onAddToPlaylist?: (song: { id: string, title: string, artist: string, albumArt: string, duration: string }) => void;
 }
 
 const SongCard = ({ 
@@ -25,12 +28,23 @@ const SongCard = ({
   isPlaying = false,
   className,
   variant = 'default',
-  youtubeUrl
+  youtubeUrl,
+  onAddToPlaylist
 }: SongCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   
   const handlePlay = () => {
     onPlay(id);
+  };
+
+  const handleAddToPlaylist = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering play
+    if (onAddToPlaylist) {
+      onAddToPlaylist({ id, title, artist, albumArt, duration });
+      toast({
+        description: `"${title}" by ${artist} has been added to your playlist`,
+      });
+    }
   };
 
   if (variant === 'compact') {
@@ -72,6 +86,15 @@ const SongCard = ({
         </div>
         
         <div className="flex items-center">
+          {onAddToPlaylist && (
+            <button 
+              onClick={handleAddToPlaylist}
+              className="text-primary hover:text-primary/80 transition-colors mr-3 opacity-0 group-hover:opacity-100"
+            >
+              <PlusCircle className="h-4 w-4" />
+            </button>
+          )}
+        
           {youtubeUrl && (
             <a 
               href={youtubeUrl} 
@@ -137,6 +160,15 @@ const SongCard = ({
         </div>
         
         <div className="flex items-center">
+          {onAddToPlaylist && (
+            <button 
+              onClick={handleAddToPlaylist}
+              className="text-primary hover:text-primary/80 transition-colors mr-3 opacity-0 group-hover:opacity-100"
+            >
+              <PlusCircle className="h-5 w-5" />
+            </button>
+          )}
+        
           {youtubeUrl && (
             <a 
               href={youtubeUrl} 
@@ -202,6 +234,15 @@ const SongCard = ({
               </svg>
             )}
           </div>
+        )}
+        
+        {onAddToPlaylist && isHovered && (
+          <button 
+            onClick={handleAddToPlaylist}
+            className="absolute top-3 right-3 rounded-full bg-primary text-primary-foreground w-8 h-8 flex items-center justify-center shadow-lg opacity-90 hover:opacity-100"
+          >
+            <PlusCircle className="h-5 w-5" />
+          </button>
         )}
       </div>
       

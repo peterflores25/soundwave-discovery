@@ -20,6 +20,7 @@ interface TrendingSongsProps {
   title?: string;
   showViewMore?: boolean;
   onViewMore?: () => void;
+  onAddToPlaylist?: (song: Song) => void;
 }
 
 const TrendingSongs = ({ 
@@ -29,7 +30,8 @@ const TrendingSongs = ({
   className,
   title = "Trending Now",
   showViewMore = false,
-  onViewMore
+  onViewMore,
+  onAddToPlaylist
 }: TrendingSongsProps) => {
   return (
     <div className={cn("py-8", className)}>
@@ -59,6 +61,7 @@ const TrendingSongs = ({
               isPlaying={currentlyPlaying === song.id}
               youtubeUrl={song.youtubeUrl}
               className="animate-scale-in"
+              onAddToPlaylist={onAddToPlaylist ? () => onAddToPlaylist(song) : undefined}
             />
           ))}
         </div>
