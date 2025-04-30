@@ -1,5 +1,6 @@
 # SoundWave - Site de recommandations de musique
 Bienvenue sur SoundWave, un site conçu pour vous aider à découvrir la musique qui correspond à vos goûts. Ce projet a été réalisé avec Node.js et Vue.js, et permet aux utilisateurs de naviguer à travers une large sélection de morceaux populaires tout en bénéficiant d'une interface claire et intuitive grâce à l'intégration de l'API Spotify.
+Lien direct : https://soundwave-discovery.lovable.app/
 
 ## À propos du projet
 SoundWave est une plateforme dédiée à la découverte de musique. L'objectif principal est de simplifier la recherche de morceaux populaires, en fonction des tendances actuelles, tout en permettant aux utilisateurs de créer des playlists de leurs morceaux favoris.
